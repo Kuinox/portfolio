@@ -6,7 +6,8 @@
     <link rel="stylesheet" href="styles.css" />
     <script src="http://www.w3schools.com/lib/w3data.js"></script>
     <link rel="stylesheet" href="resources/github-dark.min.css">
-    <script src="resources/highlight.min.js"></script>
+    
+    
 </head>
 
 <body>
@@ -14,17 +15,7 @@
     <div class="code-div" w3-include-html="codebackground.html"
     style="position: absolute; z-index: -1;"
     ></div>
-    <script>
-        let a = w3IncludeHTML();
-        setTimeout(() => {
-            let elem = document.getElementById("code");
-            hljs.highlightElement(elem);
-            elem.addEventListener("focusout", () => {
-                hljs.highlightElement(elem);
-            })
-        }, 200)
-
-    </script>
+    
     <div class="page-content">
         <h1>Compétences</h1>
         <div style="
