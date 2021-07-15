@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Portfolio de Nicolas Vandeginste</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="http://www.w3schools.com/lib/w3data.js"></script>
+    <link rel="stylesheet" href="resources/github-dark.min.css">
+    <script src="resources/highlight.min.js"></script>
+</head>
+
+<body>
+    <div class="top-bar" w3-include-html="topbar.html"></div>
+<div class="code-div" w3-include-html="codebackground.html"
+    style="position: absolute; z-index: -1;"
+    ></div>
+    <script>
+        let a = w3IncludeHTML();
+        setTimeout(() => {
+            let elem = document.getElementById("code");
+            hljs.highlightElement(elem);
+            elem.addEventListener("focusout", () => {
+                hljs.highlightElement(elem);
+            })
+        }, 200)
+
+    </script>
+    <div class="page-body">
+        <div class="page-content text-wall frost-window">
+            <h3>
+            Expert C# et .NET
+        </h3>
+        J’ai découvert le language C# lors ma 2éme année à IN'TECH.<br/>
+        Le C# est un langage de programmation orientée objet, créer en 2002 par Microsoft, et est destiné à développer
+        sur la plateforme .NET.<br/>
+        C# et .NET étant depuis récemment open sources, la plateforme= gagne de plus en plus de popularité.<br/>
+        Il est de plus en plus utilisé dans des scénarios où les performances sont critiques comme dans les jeux vidéo,
+        moteur de rendu temps réel, etc… <br/>
+        Travaillant dans un shop C#, je suis amenée à pratiquer le C# tous les jours ce qui me permet d’avoir une bonne
+        maitrise du langage. <br/>
+        J’utilise beaucoup de fonctionnalités avancé de C# comme le pattern matching, records,
+        <h4>Chez SIX Financial Information</h4>
+        Lors de mon stage chez SIX, j’ai pu pleinement exploiter la puissance du C# en développant une application C#
+        WPF en faisant un outil RH permettant d’avoir une vision sur les jour férié des employées. <br/>
+        Faire une application client lourde se connectant à une base de données pour afficher une table est extrêmement
+        rapide en C#.
+        <h4>Chez Signature Code</h4>
+        Je continue à utiliser le C#, plus des trois quart du code que j’écris est en C#. Principalement, je maintiens,
+        améliore, et créer des outils, serveur web, et process logistiques. <br/>
+        Je maintiens une CI écrite en C#, qui fonctionne sur tout les projets de l’entreprise, aussi bien écrit en C#
+        que TypeScript.
+    </div>
+</div>
+    <script>
+        w3IncludeHTML();
+    </script>
+</body>
+
+</html>

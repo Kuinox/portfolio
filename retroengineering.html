@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Portfolio de Nicolas Vandeginste</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="http://www.w3schools.com/lib/w3data.js"></script>
+    <link rel="stylesheet" href="resources/github-dark.min.css">
+    <script src="resources/highlight.min.js"></script>
+</head>
+
+<body>
+    <div class="top-bar" w3-include-html="topbar.html"></div>
+<div class="code-div" w3-include-html="codebackground.html"
+    style="position: absolute; z-index: -1;"
+    ></div>
+    <script>
+        let a = w3IncludeHTML();
+        setTimeout(() => {
+            let elem = document.getElementById("code");
+            hljs.highlightElement(elem);
+            elem.addEventListener("focusout", () => {
+                hljs.highlightElement(elem);
+            })
+        }, 200)
+
+    </script>
+    <div class="page-body">
+        <div class="page-content text-wall frost-window">
+            <h3>Retro ingénierie</h3>
+        Avoir des connaissance de base en la rétroingénierie est très utile pour un développeur.
+        A plusieurs occasion, cela m’a été utile dans un cadre professionnel. <br/>
+        Lorsque Fortnite a commencé a devenir populaire, j’y ai beaucoup joué avec mes amis. <br/>
+        Etant extrêmement intéressé  dans les données générée au cours d'une partie, je voulais voir s’ils y avaient des donnés exploitable dans les fichier de
+        replay. <br/>
+        Le code source du moteur de jeu de Fortnite est disponible à la lecture, mais il est licensé. <br/>
+        Pour connaitre le contenu du replay légalement, il faut donc uniquement inspecter le contenu du fichier, on
+        appelle ça de la rétro ingénierie de boite noire. <br/>
+        Cela prend énormément de temps, et m’ayant désintéressé de Fortnite, je n’étais plus interessé de poursuivre
+        dessus, mais cela à énormément aider la communauté qui s’était formé dans le but de lire les replays. <br/>
+        https://github.com/Kuinox/ChartsNite 
+        <h4> Wireshark</h4>
+        Wireshark permet d’inspecter ce qu’une machine émet, et reçois. Ce logiciel m’a été particulièrement utile pour
+        débugger des protocoles de communications que j’implémentais, mais m’a permis aussi de trouver beaucoup plus tôt
+        que le problème n’étais pas de mon coté mais avec la machine tiers avec laquelle je communiquais. <br/>
+        <h4> Hex Editeur</h4>
+        Un editeur hex, pour hexadecimal, permet d’afficher le contenu brut d’un fichier, même si ce n’est pas du texte. <br/>
+        Il est utile pour savoir qu’est ce qui est enregistrer dans un fichier, comparer, et voir des détails pas
+        forcément visible normalement. Il permet par exemple de voir les charactères de texte invisible, etc. <br/>
+        <h4>Visual Studio</h4> 
+        Visual Studio est un excellent outil de développement, mais ses outils de debugging peuvent être utilisé pour
+        comprendre le fonctionnement de programmes.
+    </div>
+</div>
+    <script>
+        w3IncludeHTML();
+    </script>
+</body>
+
+</html>

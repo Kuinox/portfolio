@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Portfolio de Nicolas Vandeginste</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="http://www.w3schools.com/lib/w3data.js"></script>
+    <link rel="stylesheet" href="resources/github-dark.min.css">
+    <script src="resources/highlight.min.js"></script>
+</head>
+
+<body>
+    <div class="top-bar" w3-include-html="topbar.html"></div>
+    <div class="page-body" style="padding-top: 0px; width: 100%;">
+        <div class="full-page" style="
+            background-image: url('resources/main-image.jpg');
+            background-attachment: fixed;
+            ">
+            <div style="
+            margin-top: 300px;
+            display: flex;
+            align-items: center;
+            font-size: 25pt;
+            margin-left: 150px;
+            backdrop-filter: blur(2px);
+            margin-right: 600px;
+            " class="frost-window">
+
+                Passionné de nouvelles technologies depuis toujours, <br/> j'ai fait de mon hobby un métier.<br />
+                Ma passion est de créer des outils améliorant la qualité de vie. <br />
+                Ce qui pour un développeur consiste à créer des outils pour ses congénère. <br />
+                Je travaille sur des problématique de chaines de builds, librairie réseaux, analyseurs de
+                code…
+            </div>
+
+        </div>
+        <div class="full-page" style="background-image:url('resources/DSC09833.JPG');
+            z-index: 1;">
+            Ici parcours
+        </div>
+
+        <div class="code-div" w3-include-html="codebackground.html" style="position: fixed; z-index: -1;"></div>
+        <div style="height: 100vh;"></div>
+    </div>
+    <script>
+        let a = w3IncludeHTML();
+        setTimeout(() => {
+            let elem = document.getElementById("code");
+            hljs.highlightElement(elem);
+            elem.addEventListener("focusout", () => {
+                hljs.highlightElement(elem);
+            })
+        }, 500)
+
+    </script>
+
+</body>
+
+</html>

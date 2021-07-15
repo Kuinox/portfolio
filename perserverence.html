@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Portfolio de Nicolas Vandeginste</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="http://www.w3schools.com/lib/w3data.js"></script>
+    <link rel="stylesheet" href="resources/github-dark.min.css">
+    <script src="resources/highlight.min.js"></script>
+</head>
+
+<body>
+    <div class="top-bar" w3-include-html="topbar.html"></div>
+<div class="code-div" w3-include-html="codebackground.html"
+    style="position: absolute; z-index: -1;"
+    ></div>
+    <script>
+        let a = w3IncludeHTML();
+        setTimeout(() => {
+            let elem = document.getElementById("code");
+            hljs.highlightElement(elem);
+            elem.addEventListener("focusout", () => {
+                hljs.highlightElement(elem);
+            })
+        }, 200)
+
+    </script>
+    <div class="page-body">
+        <div class="page-content text-wall frost-window">
+           <h3>Persévérance</h3> 
+        Je suis très persévérant, c’est d’ailleurs une qualité nécessaire pour l’auto-formation. <br/>
+        <h4>Auto formation</h4> 
+        Internet regorge d’informations, cela ne veut pas dire pour autant que y apprendre des choses est simple.<br/>
+        Il faut trouver une bonne source d’information, elle peut être trop vielle, incorrect, et même maintenant il y a
+        des sites spécialisé pour voler le contenu des autres sites. <br/>
+        Après avoir trouvé l’information, il faut pouvoir apprendre et appliquer, et on n’a pas forcément quelqu’un de
+        connaisseur dans le domaine pour nous aider. <br/>
+        Ils font donc pouvoir continuer alors qu’on est pas forcément productif a cause de certains blocages.
+        <h4>Debugging</h4> 
+        Le fait de trouver un bug peut être très frustrant pour certains. <br/>
+        Il faut parfois tout remettre à cause, pour moi c’est une partie de chasse :<br/>
+        Quelque chose n’est pas correct, il faut le corriger. <br/>
+        Une des choses les plus importantes est de comprendre la source du bug, pour déterminer pourquoi le bug est
+        arrivé, pour pouvoir éviter de refaire l’erreur plus tard. <br/> Beaucoup s’arrêtent après le bug corrigé, ayant été
+        trop frustré.
+    </div>
+</div>
+    <script>
+        w3IncludeHTML();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Portfolio de Nicolas Vandeginste</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="http://www.w3schools.com/lib/w3data.js"></script>
+    <link rel="stylesheet" href="resources/github-dark.min.css">
+    <script src="resources/highlight.min.js"></script>
+</head>
+
+<body>
+    <div class="top-bar" w3-include-html="topbar.html"></div>
+<div class="code-div" w3-include-html="codebackground.html"
+    style="position: absolute; z-index: -1;"
+    ></div>
+    <script>
+        let a = w3IncludeHTML();
+        setTimeout(() => {
+            let elem = document.getElementById("code");
+            hljs.highlightElement(elem);
+            elem.addEventListener("focusout", () => {
+                hljs.highlightElement(elem);
+            })
+        }, 200)
+
+    </script>
+    <div class="page-body">
+        <div class="page-content text-wall frost-window">
+        <h3> CK-MQTT</h3>
+        Mon premier projet en autonomie à Signature Code fut d’implémenter le protocole MQTT. <br/>
+        J’ai d’abord essayer d’adopter une base de code existante (MQTTnet), mais après plusieurs heures de travail
+        dessus nous avons remarqué plusieurs erreurs qui mettent le doute sur le reste de la base de code. <br/>
+        J’ai donc abandonné cette base de code, et j’ai essayé d’en reprendre une autre, celle de Xamarin. <br/>
+        Xamarin est une entreprise connue dans le monde .NET et est connu pour avoir des excellent ingénieur. <br/>
+        Malheureusement, le code en question utilisait une style de programmation différent, et rendait difficile la
+        maintenance, ajout de fonctionnalités, ou l’amélioration de performances, et montrait déjà des problèmes de performances. <br/>
+        J’ai donc décidé de partir de zéro, et d’implémenter tout moi-même. <br/>
+        Le protocole est censé être simple, et au premier abord, on pense naïvement que l’implémentation du protocole
+        est lui aussi simple. <br/>
+        Mais à cause d’un manque de restrictions des spécifications, il est compliqué d’implémenter correctement le protocole, et à cause d’un manque de rigueur sur les implémentations existante, je
+        n’ai vu aucune implémentation qui ne garantisse pas de ne pas causer de perte de donnée. <br/>
+        Aujourd’hui le projet est en pause a un état avancé et manque encore du travail pour être robuste et stable.
+    </div>
+</div>
+    <script>
+        w3IncludeHTML();
+    </script>
+</body>
+
+</html>

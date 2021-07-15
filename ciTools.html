@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Portfolio de Nicolas Vandeginste</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="http://www.w3schools.com/lib/w3data.js"></script>
+    <link rel="stylesheet" href="resources/github-dark.min.css">
+    <script src="resources/highlight.min.js"></script>
+</head>
+
+<body>
+    <div class="top-bar" w3-include-html="topbar.html"></div>
+<div class="code-div" w3-include-html="codebackground.html"
+    style="position: absolute; z-index: -1;"
+    ></div>
+    <script>
+        let a = w3IncludeHTML();
+        setTimeout(() => {
+            let elem = document.getElementById("code");
+            hljs.highlightElement(elem);
+            elem.addEventListener("focusout", () => {
+                hljs.highlightElement(elem);
+            })
+        }, 200)
+
+    </script>
+    <div class="page-body">
+        <div class="page-content text-wall frost-window">
+            <h3> Outils d’Intégration Continue </h3>
+            Le principe de la Continious Integration (CI), intégration continue, est de souvent intégrer les changements
+            des développeurs dans la base de code d’un produit. <br/>
+            Il est ensuite courant de rajouter un « Serveur de CI » qui va surveiller les changements sur le dépôt de code et exécuter un script pour vérifier les changements.
+            <br/>
+            Pendants 6 mois, j’ai travaillé sur la CI de Signature Code, différents outils sont utilisés lors de notre cycle DevOps :
+            <img src="ciDiag.png" alt="Schéma du processus de CI de Signature Code."/>
+            
+            <h4>NPM & JavaScript/TypeScript</h4>
+            Le gestionnaire de paquet de JavaScript le plus populaire est Node Package Manager (NPM), il est plus commun
+            de l’appeler par ses initiales. <br/>
+            Nous avons rencontré de nombreuses difficultés dans l’utilisation de NPM,
+            principalement causées par le fait qu’il n’est pas conçu pour être appelé par du code, ce qui rend
+            l’implémentation d’outil utilisant npm tortueuse, par exemple, il est impossible de donner un mot de passe à NPM sans
+            l’inscrire dans un fichier, fichier qui est normalement publié par le développeur.
+
+            <h4>NuGet</h4>
+            NuGet est un gestionnaire de paquets développé par Microsoft, il est surtout utilisé sur la plateforme .NET. <br/>
+            Un paquet est une archive contenant divers fichiers. Dans le cas de NuGet, les packages sont utilisés le
+            plus souvent comme librairies .NET. <br/>
+            Un gestionnaire de paquets automatise les tâches liées au paquet, comme l’installation ou la mise à niveau. <br/>
+            Les  paquets sont stockés dans un dépôt de paquets, et les gestionnaires de paquets sont souvent capables de
+            télécharger automatiquement les paquets à partir de son nom et de sa version. <br/>
+             <h4>AppVeyor</h4>
+            AppVeyor est un service d’Intégration Continue qui fournis des serveurs de CI.
+        </div>
+    </div>
+
+    <script>
+        w3IncludeHTML();
+    </script>
+</body>
+
+</html>

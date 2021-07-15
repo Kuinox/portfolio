@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Portfolio de Nicolas Vandeginste</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="http://www.w3schools.com/lib/w3data.js"></script>
+    <link rel="stylesheet" href="resources/github-dark.min.css">
+    <script src="resources/highlight.min.js"></script>
+</head>
+
+<body>
+    <div class="top-bar" w3-include-html="topbar.html"></div>
+    <div class="code-div" w3-include-html="codebackground.html"
+    style="position: absolute; z-index: -1;"
+    ></div>
+    <script>
+        let a = w3IncludeHTML();
+        setTimeout(() => {
+            let elem = document.getElementById("code");
+            hljs.highlightElement(elem);
+            elem.addEventListener("focusout", () => {
+                hljs.highlightElement(elem);
+            })
+        }, 200)
+
+    </script>
+    <div class="page-content">
+        <h1>Compétences</h1>
+        <div style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 50px;
+        ">
+            <div class="competence-list frost-window">
+                <h3>Compétences Techniques</h3>
+                <div>
+                    <a class="frost-window" href="ciTools.html">Outils d'Intégration Continue</a>
+                    <a class="frost-window" href="ckmqtt.html"> CK-MQTT </a>
+                    <a class="frost-window" href="csharp.html"> Expertise C# et .NET </a>
+                    <a class="frost-window" href="retroengineering.html"> Retro ingénierie </a>
+                    <a class="frost-window" href="opensource.html">Contributeur Open Source</a>
+                </div>
+            </div>
+            <div class="competence-list frost-window">
+                <h3>Compétences Humaines</h3>
+                <div>
+                    <a class="frost-window" href="autoformation.html">Auto formation</a>
+                    <a class="frost-window" href="perserverence.html">Persévérance</a>
+                    <a class="frost-window" href="veille.html"> Veille technologique</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        w3IncludeHTML();
+    </script>
+</body>
+
+</html>

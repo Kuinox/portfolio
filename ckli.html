@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Portfolio de Nicolas Vandeginste</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="http://www.w3schools.com/lib/w3data.js"></script>
+    <link rel="stylesheet" href="resources/github-dark.min.css">
+    <script src="resources/highlight.min.js"></script>
+</head>
+
+<body>
+    <div class="top-bar" w3-include-html="topbar.html"></div>
+<div class="code-div" w3-include-html="codebackground.html"
+    style="position: absolute; z-index: -1;"
+    ></div>
+    <script>
+        let a = w3IncludeHTML();
+        setTimeout(() => {
+            let elem = document.getElementById("code");
+            hljs.highlightElement(elem);
+            elem.addEventListener("focusout", () => {
+                hljs.highlightElement(elem);
+            })
+        }, 200)
+
+    </script>
+    <div class="page-body">
+        <div class="page-content text-wall frost-window">
+        <h3> CKli</h3>
+        CKli est un outil agrégeant des dépôts de code et automatisant des actions sur ces agrégats.
+        <br/>
+        Il a été initié par Olivier Spinelli, car il passait trop de temps à mettre à jour les outils de Signature Code.<br/>
+        <br/>
+        <h4>Problématiques</h4>
+        Chaque librairie de Signature-Code est dans son propre dépôt de code.<br/>
+        Cela engendre deux problèmes : <br/>
+        Il est difficile de se représenter l’état général de toutes les librairies, et faire des opérations communes sur toutes ces librairies prend beaucoup de temps.
+        <br/>
+        <br/>
+        On appelle cet ensemble de librairies une « stack », celle de Signature-Code possède 38 dépôts de code, qui génère un total de 151 artéfacts.
+        <br/>La moindre petite action à faire sur l’ensemble des dépôts engendre au moins une demi-journée de travail. <br/>
+
+        <h4>Solutions existantes</h4>
+        Il existe des méthodes et des solutions sur le marché, mais elles ne peuvent pas s’appliquer aux besoins de Signature-Code.
+        <br/>
+        •	La méthode du Monorepo : le « monolithic repository », ou dépôt de code monolithique en français, consiste à mettre toutes ses librairies dans le même dépôt de code. <br/>
+        Cela permet d’effectuer quelques types d’actions sur l’ensemble des projets, comme compiler, mais ne permet pas la gestion fine des droits d’accès : on ne peut pas donner l’accès à une personne à une seule librairie.
+        <br/> Or, c’est une fonctionnalité qu’on souhaite garder, on ne peut donc pas utiliser un Monorepo. <br/>
+        L’approche que nous utilisons, est appelée « multi-repo » pour multi repositories. <br/>
+        •	Parmi les outils existants qui essayent d’aider à gérer les multi-repo, aucun n’est aussi poussé que ce que l’on veut.<br/>
+        La plupart se contentent de globaliser les opérations git, comme « Repo », l’outil utilisé pour gérer le millier de dépôts de code constituant Android.
+        <br/>
+        <br/>
+        <i>Il nous fallait donc créer un outil pour cela, et cet outil s’appelle aujourd’hui CKli.</i>
+        
+        
+
+    </div>
+</div>
+    <script>
+        w3IncludeHTML();
+    </script>
+</body>
+
+</html>

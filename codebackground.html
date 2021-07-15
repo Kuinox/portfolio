@@ -1,0 +1,208 @@
+<pre id="code" class="language-csharp" contenteditable="true" spellcheck="false" aria-hidden="true">
+            using CK.MQTT.Common.Stores;
+            using System;
+            using System.Collections.Generic;
+            using System.Diagnostics;
+            using System.Runtime.ConstrainedExecution;
+            
+            #nullable enable
+            
+            namespace CK.MQTT.Stores
+            {
+                class IdStore&lt;T&gt; where T : struct
+                {
+                    // This is a doubly linked list.
+                    // There is a cursor, named '_newestIdAllocated' that point to the most recent ID allocated.
+                    // Packet behind this cursor are available packet ID.
+                    // Packet after this cursor are used packets ID.
+                    // Because we move an element to the tail when an ID is freed it mean that the IDs are sorted chronologically:
+                    // - The tail is the most recent freed packet ID,
+                    // - The previous packet of the &quot;_newestIdAllocated&quot; is the oldest freed ID.
+                    // - The _newestIdAllocated, is well, the newest id allocated.
+                    // - The head of the list is the oldest id allocated.
+                    // - To allocate a new ID we just have to move the _newestIdAllocated to the next element.
+            
+            
+                    /// &lt;summary&gt;
+                    /// o _head: oldest ID allocated  &lt;br/&gt;
+                    /// | &lt;br/&gt;
+                    /// | &lt;br/&gt;
+                    /// o _newestIdAllocated &lt;br/&gt;
+                    /// | ⬅️ This id was unallocated the longest ago&lt;br/&gt;
+                    /// | &lt;br/&gt;
+                    /// | ↖️ previous &lt;br/&gt;
+                    /// | ↙️ next &lt;br/&gt;
+                    /// | &lt;br/&gt;
+                    /// o _tail: most recent freed packet &lt;br/&gt;
+                    /// &lt;/summary&gt;
+                    internal ArrayStartingAt1&lt;IdStoreEntry&lt;T&gt;&gt; _entries;
+                    /// &lt;summary&gt;
+                    /// When 0, all IDs are free.
+                    /// &lt;/summary&gt;
+                    internal int _newestIdAllocated;
+                    /// &lt;summary&gt;
+                    /// The tail, also the most recent freed packet.
+                    /// &lt;/summary&gt;
+                    internal int _tail;
+                    /// &lt;summary&gt;
+                    /// The head, also point to the newest ID allocated.
+                    /// &lt;/summary&gt;
+                    internal int _head;
+                    readonly int _maxPacketId;
+            
+                    public bool NoPacketAllocated =&gt; _newestIdAllocated == 0;
+                    readonly object _lock = new();
+            
+                    public IdStore( int packetIdMaxValue, int startSize )
+                    {
+                        if( startSize &lt;= 0 || startSize &gt; packetIdMaxValue )
+                        {
+                            throw new ArgumentOutOfRangeException( $&quot;{nameof( startSize )} must be greater than 0 and smaller than {packetIdMaxValue}&quot; );
+                        }
+                        _maxPacketId = packetIdMaxValue;
+                        _entries = new ArrayStartingAt1&lt;IdStoreEntry&lt;T&gt;&gt;( new IdStoreEntry&lt;T&gt;[startSize] );
+                        Reset();
+                    }
+            
+                    internal void Reset()
+                    {
+                        _entries.Clear();
+                        for( int i = 1; i &lt; _entries.Length + 1; i++ )
+                        {
+                            _entries[i] = new IdStoreEntry&lt;T&gt;()
+                            {
+                                NextId = i + 1,
+                                PreviousId = i - 1 // 'i' is not incremented so it's the previous packet id.
+                            };
+                        }
+                        _entries[^0] = new IdStoreEntry&lt;T&gt;()
+                        {
+                            PreviousId = _entries.Length - 1
+                        };
+                        _head = 1;
+                        _tail = _entries.Length;
+                        _newestIdAllocated = 0;
+                    }
+            
+            
+                    internal void SelfConsistencyCheck()
+                    {
+            #if DEBUG
+                        int curr = _head;
+                        int count = 1;
+                        while( curr != _tail ) // forward
+                        {
+                            count++;
+                            curr = _entries[curr].NextId;
+                            if( curr == 0 ) throw new InvalidOperationException( &quot;Error detected in the store: a node is not linked !&quot; );
+                        }
+                        if( count != _entries.Length ) throw new InvalidOperationException( &quot;Error detected in the store: links are not consistent.&quot; );
+                        count = 1;
+                        while( curr != _head ) // backward
+                        {
+                            count++;
+                            curr = _entries[curr].PreviousId;
+                            if( curr == 0 ) throw new InvalidOperationException( &quot;Error detected in the store: a node is not linked !&quot; );
+                        }
+                        if( count != _entries.Length ) throw new InvalidOperationException( &quot;Error detected in the store: links are not consistent.&quot; );
+            #endif
+                    }
+                    internal bool CreateNewEntry( T entry, out int packetId )
+                    {
+                        SelfConsistencyCheck();
+                        lock( _lock )
+                        {
+                            if( _newestIdAllocated == _tail ) // The oldest packet we sent is also the tail. It mean there are no packet Id available.
+                            {
+                                if( _entries.Length == _maxPacketId ) // All packets are busy.
+                                {
+                                    packetId = 0;
+                                    return false;
+                                }
+                                GrowEntriesArray();
+                                Debug.Assert( _newestIdAllocated != _tail );
+                            }
+                            if( _newestIdAllocated == 0 )
+                            {
+                                // Mean no ID is currently allocated.
+                                _newestIdAllocated = _head;
+                                packetId = _newestIdAllocated;
+                                _entries[_newestIdAllocated].Content = entry;
+                                return true;
+                            }
+                            packetId = _entries[_newestIdAllocated].NextId;
+                            _newestIdAllocated = packetId;
+                            _entries[_newestIdAllocated].Content = entry;
+                            SelfConsistencyCheck();
+                            return true;
+                        }
+                    }
+            
+                    internal void FreeId( IInputLogger? m, int packetId )
+                    {
+                        SelfConsistencyCheck();
+                        if( packetId == _newestIdAllocated )
+                        {
+                            // If a node have no previous, it equal to 0.
+                            // Here if the newest id allocated has no previous, it mean there a no other allocated id.
+                            // In this case, the _newestIdAllocated should be set to 0.
+                            _newestIdAllocated = _entries[packetId].PreviousId;
+                        }
+                        int next = _entries[packetId].NextId;
+                        int previous = _entries[packetId].PreviousId;
+                        // Removing the element from the linked list.
+                        if( packetId == _head )
+                        {
+                            _head = next;
+                        }
+                        if( next != 0 )
+                        {
+                            _entries[next].PreviousId = previous;
+                        }
+                        if( previous != 0 )
+                        {
+                            _entries[previous].NextId = next;
+                        }
+            
+                        _entries[packetId].NextId = 0;
+                        _entries[packetId].PreviousId = _tail;
+                        _entries[packetId].Content = default;
+                        _entries[_tail].NextId = packetId;
+                        _tail = packetId;
+                        m?.FreedPacketId( packetId );// This may want to free the packet we are freeing. So it must be ran after the free process.
+                        SelfConsistencyCheck();
+                    }
+            
+                    void GrowEntriesArray()
+                    {
+                        SelfConsistencyCheck();
+                        int newCount = _entries.Length * 2;
+                        // We dont want that the next grow make the array only 1 item bigger, it would cause a bug later in this function.
+                        if( newCount + 1 == _maxPacketId ) newCount = _maxPacketId;
+                        if( newCount &gt; _maxPacketId ) newCount = _maxPacketId;
+                        var newEntries = new ArrayStartingAt1&lt;IdStoreEntry&lt;T&gt;&gt;( new IdStoreEntry&lt;T&gt;[newCount] );
+                        _entries.CopyTo( newEntries, 0 );
+                        for( int i = _entries.Length + 2; i &lt; newEntries.Length; i++ ) // Link all the new entries.
+                        {
+                            newEntries[i] = new IdStoreEntry&lt;T&gt;()
+                            {
+                                PreviousId = i - 1,
+                                NextId = i + 1
+                            };
+                        }
+                        newEntries[^0].PreviousId = newEntries.Length - 1;
+                        newEntries[_tail].NextId = _entries.Length + 1; // Link previous tail to our expansion.
+                        newEntries[_entries.Length + 1] = new IdStoreEntry&lt;T&gt;()
+                        {
+                            PreviousId = _tail, // Link expansion to previous tail.
+                            NextId = _entries.Length + 2 // If the count was increased only by 1, this would fail.
+                        };
+                        _tail = newEntries.Length;
+                        _entries = newEntries;
+                        SelfConsistencyCheck();
+                    }
+                }
+            }
+            
+       
+</pre>
