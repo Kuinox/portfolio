@@ -1,208 +1,207 @@
-<pre id="code" class="language-csharp" contenteditable="true" spellcheck="false" aria-hidden="true">
-            using CK.MQTT.Common.Stores;
-            using System;
-            using System.Collections.Generic;
-            using System.Diagnostics;
-            using System.Runtime.ConstrainedExecution;
-            
-            #nullable enable
-            
-            namespace CK.MQTT.Stores
+<pre id="code" class="language-csharp hljs" contenteditable="true" spellcheck="false" aria-hidden="true">            <span class="hljs-keyword">using</span> CK.MQTT.Common.Stores;
+    <span class="hljs-keyword">using</span> System;
+    <span class="hljs-keyword">using</span> System.Collections.Generic;
+    <span class="hljs-keyword">using</span> System.Diagnostics;
+    <span class="hljs-keyword">using</span> System.Runtime.ConstrainedExecution;
+    
+    <span class="hljs-meta">#nullable enable</span>
+    
+    <span class="hljs-keyword">namespace</span> <span class="hljs-title">CK.MQTT.Stores</span>
+    {
+        <span class="hljs-keyword">class</span> <span class="hljs-title">IdStore</span>&lt;<span class="hljs-title">T</span>&gt; <span class="hljs-keyword">where</span> <span class="hljs-title">T</span> : <span class="hljs-title">struct</span>
+        {
+            <span class="hljs-comment">// This is a doubly linked list.</span>
+            <span class="hljs-comment">// There is a cursor, named '_newestIdAllocated' that point to the most recent ID allocated.</span>
+            <span class="hljs-comment">// Packet behind this cursor are available packet ID.</span>
+            <span class="hljs-comment">// Packet after this cursor are used packets ID.</span>
+            <span class="hljs-comment">// Because we move an element to the tail when an ID is freed it mean that the IDs are sorted chronologically:</span>
+            <span class="hljs-comment">// - The tail is the most recent freed packet ID,</span>
+            <span class="hljs-comment">// - The previous packet of the "_newestIdAllocated" is the oldest freed ID.</span>
+            <span class="hljs-comment">// - The _newestIdAllocated, is well, the newest id allocated.</span>
+            <span class="hljs-comment">// - The head of the list is the oldest id allocated.</span>
+            <span class="hljs-comment">// - To allocate a new ID we just have to move the _newestIdAllocated to the next element.</span>
+    
+    
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> <span class="hljs-doctag">&lt;summary&gt;</span></span>
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> o _head: oldest ID allocated  <span class="hljs-doctag">&lt;br/&gt;</span></span>
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> | <span class="hljs-doctag">&lt;br/&gt;</span></span>
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> | <span class="hljs-doctag">&lt;br/&gt;</span></span>
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> o _newestIdAllocated <span class="hljs-doctag">&lt;br/&gt;</span></span>
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> | ⬅️ This id was unallocated the longest ago<span class="hljs-doctag">&lt;br/&gt;</span></span>
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> | <span class="hljs-doctag">&lt;br/&gt;</span></span>
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> | ↖️ previous <span class="hljs-doctag">&lt;br/&gt;</span></span>
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> | ↙️ next <span class="hljs-doctag">&lt;br/&gt;</span></span>
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> | <span class="hljs-doctag">&lt;br/&gt;</span></span>
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> o _tail: most recent freed packet <span class="hljs-doctag">&lt;br/&gt;</span></span>
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> <span class="hljs-doctag">&lt;/summary&gt;</span></span>
+            <span class="hljs-keyword">internal</span> ArrayStartingAt1&lt;IdStoreEntry&lt;T&gt;&gt; _entries;
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> <span class="hljs-doctag">&lt;summary&gt;</span></span>
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> When 0, all IDs are free.</span>
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> <span class="hljs-doctag">&lt;/summary&gt;</span></span>
+            <span class="hljs-keyword">internal</span> <span class="hljs-built_in">int</span> _newestIdAllocated;
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> <span class="hljs-doctag">&lt;summary&gt;</span></span>
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> The tail, also the most recent freed packet.</span>
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> <span class="hljs-doctag">&lt;/summary&gt;</span></span>
+            <span class="hljs-keyword">internal</span> <span class="hljs-built_in">int</span> _tail;
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> <span class="hljs-doctag">&lt;summary&gt;</span></span>
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> The head, also point to the newest ID allocated.</span>
+            <span class="hljs-comment"><span class="hljs-doctag">///</span> <span class="hljs-doctag">&lt;/summary&gt;</span></span>
+            <span class="hljs-keyword">internal</span> <span class="hljs-built_in">int</span> _head;
+            <span class="hljs-keyword">readonly</span> <span class="hljs-built_in">int</span> _maxPacketId;
+    
+            <span class="hljs-keyword">public</span> <span class="hljs-built_in">bool</span> NoPacketAllocated =&gt; _newestIdAllocated == <span class="hljs-number">0</span>;
+            <span class="hljs-keyword">readonly</span> <span class="hljs-built_in">object</span> _lock = <span class="hljs-keyword">new</span>();
+    
+            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">IdStore</span>(<span class="hljs-params"> <span class="hljs-built_in">int</span> packetIdMaxValue, <span class="hljs-built_in">int</span> startSize </span>)</span>
             {
-                class IdStore&lt;T&gt; where T : struct
+                <span class="hljs-keyword">if</span>( startSize &lt;= <span class="hljs-number">0</span> || startSize &gt; packetIdMaxValue )
                 {
-                    // This is a doubly linked list.
-                    // There is a cursor, named '_newestIdAllocated' that point to the most recent ID allocated.
-                    // Packet behind this cursor are available packet ID.
-                    // Packet after this cursor are used packets ID.
-                    // Because we move an element to the tail when an ID is freed it mean that the IDs are sorted chronologically:
-                    // - The tail is the most recent freed packet ID,
-                    // - The previous packet of the &quot;_newestIdAllocated&quot; is the oldest freed ID.
-                    // - The _newestIdAllocated, is well, the newest id allocated.
-                    // - The head of the list is the oldest id allocated.
-                    // - To allocate a new ID we just have to move the _newestIdAllocated to the next element.
-            
-            
-                    /// &lt;summary&gt;
-                    /// o _head: oldest ID allocated  &lt;br/&gt;
-                    /// | &lt;br/&gt;
-                    /// | &lt;br/&gt;
-                    /// o _newestIdAllocated &lt;br/&gt;
-                    /// | ⬅️ This id was unallocated the longest ago&lt;br/&gt;
-                    /// | &lt;br/&gt;
-                    /// | ↖️ previous &lt;br/&gt;
-                    /// | ↙️ next &lt;br/&gt;
-                    /// | &lt;br/&gt;
-                    /// o _tail: most recent freed packet &lt;br/&gt;
-                    /// &lt;/summary&gt;
-                    internal ArrayStartingAt1&lt;IdStoreEntry&lt;T&gt;&gt; _entries;
-                    /// &lt;summary&gt;
-                    /// When 0, all IDs are free.
-                    /// &lt;/summary&gt;
-                    internal int _newestIdAllocated;
-                    /// &lt;summary&gt;
-                    /// The tail, also the most recent freed packet.
-                    /// &lt;/summary&gt;
-                    internal int _tail;
-                    /// &lt;summary&gt;
-                    /// The head, also point to the newest ID allocated.
-                    /// &lt;/summary&gt;
-                    internal int _head;
-                    readonly int _maxPacketId;
-            
-                    public bool NoPacketAllocated =&gt; _newestIdAllocated == 0;
-                    readonly object _lock = new();
-            
-                    public IdStore( int packetIdMaxValue, int startSize )
+                    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ArgumentOutOfRangeException( <span class="hljs-string">$"<span class="hljs-subst">{<span class="hljs-keyword">nameof</span>( startSize )}</span> must be greater than 0 and smaller than <span class="hljs-subst">{packetIdMaxValue}</span>"</span> );
+                }
+                _maxPacketId = packetIdMaxValue;
+                _entries = <span class="hljs-keyword">new</span> ArrayStartingAt1&lt;IdStoreEntry&lt;T&gt;&gt;( <span class="hljs-keyword">new</span> IdStoreEntry&lt;T&gt;[startSize] );
+                Reset();
+            }
+    
+            <span class="hljs-function"><span class="hljs-keyword">internal</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Reset</span>(<span class="hljs-params"></span>)</span>
+            {
+                _entries.Clear();
+                <span class="hljs-keyword">for</span>( <span class="hljs-built_in">int</span> i = <span class="hljs-number">1</span>; i &lt; _entries.Length + <span class="hljs-number">1</span>; i++ )
+                {
+                    _entries[i] = <span class="hljs-keyword">new</span> IdStoreEntry&lt;T&gt;()
                     {
-                        if( startSize &lt;= 0 || startSize &gt; packetIdMaxValue )
-                        {
-                            throw new ArgumentOutOfRangeException( $&quot;{nameof( startSize )} must be greater than 0 and smaller than {packetIdMaxValue}&quot; );
-                        }
-                        _maxPacketId = packetIdMaxValue;
-                        _entries = new ArrayStartingAt1&lt;IdStoreEntry&lt;T&gt;&gt;( new IdStoreEntry&lt;T&gt;[startSize] );
-                        Reset();
-                    }
-            
-                    internal void Reset()
+                        NextId = i + <span class="hljs-number">1</span>,
+                        PreviousId = i - <span class="hljs-number">1</span> <span class="hljs-comment">// 'i' is not incremented so it's the previous packet id.</span>
+                    };
+                }
+                _entries[^<span class="hljs-number">0</span>] = <span class="hljs-keyword">new</span> IdStoreEntry&lt;T&gt;()
+                {
+                    PreviousId = _entries.Length - <span class="hljs-number">1</span>
+                };
+                _head = <span class="hljs-number">1</span>;
+                _tail = _entries.Length;
+                _newestIdAllocated = <span class="hljs-number">0</span>;
+            }
+    
+    
+            <span class="hljs-function"><span class="hljs-keyword">internal</span> <span class="hljs-keyword">void</span> <span class="hljs-title">SelfConsistencyCheck</span>(<span class="hljs-params"></span>)</span>
+            {
+    <span class="hljs-meta">#<span class="hljs-keyword">if</span> DEBUG</span>
+                <span class="hljs-built_in">int</span> curr = _head;
+                <span class="hljs-built_in">int</span> count = <span class="hljs-number">1</span>;
+                <span class="hljs-keyword">while</span>( curr != _tail ) <span class="hljs-comment">// forward</span>
+                {
+                    count++;
+                    curr = _entries[curr].NextId;
+                    <span class="hljs-keyword">if</span>( curr == <span class="hljs-number">0</span> ) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> InvalidOperationException( <span class="hljs-string">"Error detected in the store: a node is not linked !"</span> );
+                }
+                <span class="hljs-keyword">if</span>( count != _entries.Length ) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> InvalidOperationException( <span class="hljs-string">"Error detected in the store: links are not consistent."</span> );
+                count = <span class="hljs-number">1</span>;
+                <span class="hljs-keyword">while</span>( curr != _head ) <span class="hljs-comment">// backward</span>
+                {
+                    count++;
+                    curr = _entries[curr].PreviousId;
+                    <span class="hljs-keyword">if</span>( curr == <span class="hljs-number">0</span> ) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> InvalidOperationException( <span class="hljs-string">"Error detected in the store: a node is not linked !"</span> );
+                }
+                <span class="hljs-keyword">if</span>( count != _entries.Length ) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> InvalidOperationException( <span class="hljs-string">"Error detected in the store: links are not consistent."</span> );
+    <span class="hljs-meta">#<span class="hljs-keyword">endif</span></span>
+            }
+            <span class="hljs-function"><span class="hljs-keyword">internal</span> <span class="hljs-built_in">bool</span> <span class="hljs-title">CreateNewEntry</span>(<span class="hljs-params"> T entry, <span class="hljs-keyword">out</span> <span class="hljs-built_in">int</span> packetId </span>)</span>
+            {
+                SelfConsistencyCheck();
+                <span class="hljs-keyword">lock</span>( _lock )
+                {
+                    <span class="hljs-keyword">if</span>( _newestIdAllocated == _tail ) <span class="hljs-comment">// The oldest packet we sent is also the tail. It mean there are no packet Id available.</span>
                     {
-                        _entries.Clear();
-                        for( int i = 1; i &lt; _entries.Length + 1; i++ )
+                        <span class="hljs-keyword">if</span>( _entries.Length == _maxPacketId ) <span class="hljs-comment">// All packets are busy.</span>
                         {
-                            _entries[i] = new IdStoreEntry&lt;T&gt;()
-                            {
-                                NextId = i + 1,
-                                PreviousId = i - 1 // 'i' is not incremented so it's the previous packet id.
-                            };
+                            packetId = <span class="hljs-number">0</span>;
+                            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
                         }
-                        _entries[^0] = new IdStoreEntry&lt;T&gt;()
-                        {
-                            PreviousId = _entries.Length - 1
-                        };
-                        _head = 1;
-                        _tail = _entries.Length;
-                        _newestIdAllocated = 0;
+                        GrowEntriesArray();
+                        Debug.Assert( _newestIdAllocated != _tail );
                     }
-            
-            
-                    internal void SelfConsistencyCheck()
+                    <span class="hljs-keyword">if</span>( _newestIdAllocated == <span class="hljs-number">0</span> )
                     {
-            #if DEBUG
-                        int curr = _head;
-                        int count = 1;
-                        while( curr != _tail ) // forward
-                        {
-                            count++;
-                            curr = _entries[curr].NextId;
-                            if( curr == 0 ) throw new InvalidOperationException( &quot;Error detected in the store: a node is not linked !&quot; );
-                        }
-                        if( count != _entries.Length ) throw new InvalidOperationException( &quot;Error detected in the store: links are not consistent.&quot; );
-                        count = 1;
-                        while( curr != _head ) // backward
-                        {
-                            count++;
-                            curr = _entries[curr].PreviousId;
-                            if( curr == 0 ) throw new InvalidOperationException( &quot;Error detected in the store: a node is not linked !&quot; );
-                        }
-                        if( count != _entries.Length ) throw new InvalidOperationException( &quot;Error detected in the store: links are not consistent.&quot; );
-            #endif
+                        <span class="hljs-comment">// Mean no ID is currently allocated.</span>
+                        _newestIdAllocated = _head;
+                        packetId = _newestIdAllocated;
+                        _entries[_newestIdAllocated].Content = entry;
+                        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
                     }
-                    internal bool CreateNewEntry( T entry, out int packetId )
-                    {
-                        SelfConsistencyCheck();
-                        lock( _lock )
-                        {
-                            if( _newestIdAllocated == _tail ) // The oldest packet we sent is also the tail. It mean there are no packet Id available.
-                            {
-                                if( _entries.Length == _maxPacketId ) // All packets are busy.
-                                {
-                                    packetId = 0;
-                                    return false;
-                                }
-                                GrowEntriesArray();
-                                Debug.Assert( _newestIdAllocated != _tail );
-                            }
-                            if( _newestIdAllocated == 0 )
-                            {
-                                // Mean no ID is currently allocated.
-                                _newestIdAllocated = _head;
-                                packetId = _newestIdAllocated;
-                                _entries[_newestIdAllocated].Content = entry;
-                                return true;
-                            }
-                            packetId = _entries[_newestIdAllocated].NextId;
-                            _newestIdAllocated = packetId;
-                            _entries[_newestIdAllocated].Content = entry;
-                            SelfConsistencyCheck();
-                            return true;
-                        }
-                    }
-            
-                    internal void FreeId( IInputLogger? m, int packetId )
-                    {
-                        SelfConsistencyCheck();
-                        if( packetId == _newestIdAllocated )
-                        {
-                            // If a node have no previous, it equal to 0.
-                            // Here if the newest id allocated has no previous, it mean there a no other allocated id.
-                            // In this case, the _newestIdAllocated should be set to 0.
-                            _newestIdAllocated = _entries[packetId].PreviousId;
-                        }
-                        int next = _entries[packetId].NextId;
-                        int previous = _entries[packetId].PreviousId;
-                        // Removing the element from the linked list.
-                        if( packetId == _head )
-                        {
-                            _head = next;
-                        }
-                        if( next != 0 )
-                        {
-                            _entries[next].PreviousId = previous;
-                        }
-                        if( previous != 0 )
-                        {
-                            _entries[previous].NextId = next;
-                        }
-            
-                        _entries[packetId].NextId = 0;
-                        _entries[packetId].PreviousId = _tail;
-                        _entries[packetId].Content = default;
-                        _entries[_tail].NextId = packetId;
-                        _tail = packetId;
-                        m?.FreedPacketId( packetId );// This may want to free the packet we are freeing. So it must be ran after the free process.
-                        SelfConsistencyCheck();
-                    }
-            
-                    void GrowEntriesArray()
-                    {
-                        SelfConsistencyCheck();
-                        int newCount = _entries.Length * 2;
-                        // We dont want that the next grow make the array only 1 item bigger, it would cause a bug later in this function.
-                        if( newCount + 1 == _maxPacketId ) newCount = _maxPacketId;
-                        if( newCount &gt; _maxPacketId ) newCount = _maxPacketId;
-                        var newEntries = new ArrayStartingAt1&lt;IdStoreEntry&lt;T&gt;&gt;( new IdStoreEntry&lt;T&gt;[newCount] );
-                        _entries.CopyTo( newEntries, 0 );
-                        for( int i = _entries.Length + 2; i &lt; newEntries.Length; i++ ) // Link all the new entries.
-                        {
-                            newEntries[i] = new IdStoreEntry&lt;T&gt;()
-                            {
-                                PreviousId = i - 1,
-                                NextId = i + 1
-                            };
-                        }
-                        newEntries[^0].PreviousId = newEntries.Length - 1;
-                        newEntries[_tail].NextId = _entries.Length + 1; // Link previous tail to our expansion.
-                        newEntries[_entries.Length + 1] = new IdStoreEntry&lt;T&gt;()
-                        {
-                            PreviousId = _tail, // Link expansion to previous tail.
-                            NextId = _entries.Length + 2 // If the count was increased only by 1, this would fail.
-                        };
-                        _tail = newEntries.Length;
-                        _entries = newEntries;
-                        SelfConsistencyCheck();
-                    }
+                    packetId = _entries[_newestIdAllocated].NextId;
+                    _newestIdAllocated = packetId;
+                    _entries[_newestIdAllocated].Content = entry;
+                    SelfConsistencyCheck();
+                    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
                 }
             }
-            
-       
+    
+            <span class="hljs-function"><span class="hljs-keyword">internal</span> <span class="hljs-keyword">void</span> <span class="hljs-title">FreeId</span>(<span class="hljs-params"> IInputLogger? m, <span class="hljs-built_in">int</span> packetId </span>)</span>
+            {
+                SelfConsistencyCheck();
+                <span class="hljs-keyword">if</span>( packetId == _newestIdAllocated )
+                {
+                    <span class="hljs-comment">// If a node have no previous, it equal to 0.</span>
+                    <span class="hljs-comment">// Here if the newest id allocated has no previous, it mean there a no other allocated id.</span>
+                    <span class="hljs-comment">// In this case, the _newestIdAllocated should be set to 0.</span>
+                    _newestIdAllocated = _entries[packetId].PreviousId;
+                }
+                <span class="hljs-built_in">int</span> next = _entries[packetId].NextId;
+                <span class="hljs-built_in">int</span> previous = _entries[packetId].PreviousId;
+                <span class="hljs-comment">// Removing the element from the linked list.</span>
+                <span class="hljs-keyword">if</span>( packetId == _head )
+                {
+                    _head = next;
+                }
+                <span class="hljs-keyword">if</span>( next != <span class="hljs-number">0</span> )
+                {
+                    _entries[next].PreviousId = previous;
+                }
+                <span class="hljs-keyword">if</span>( previous != <span class="hljs-number">0</span> )
+                {
+                    _entries[previous].NextId = next;
+                }
+    
+                _entries[packetId].NextId = <span class="hljs-number">0</span>;
+                _entries[packetId].PreviousId = _tail;
+                _entries[packetId].Content = <span class="hljs-literal">default</span>;
+                _entries[_tail].NextId = packetId;
+                _tail = packetId;
+                m?.FreedPacketId( packetId );<span class="hljs-comment">// This may want to free the packet we are freeing. So it must be ran after the free process.</span>
+                SelfConsistencyCheck();
+            }
+    
+            <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">GrowEntriesArray</span>(<span class="hljs-params"></span>)</span>
+            {
+                SelfConsistencyCheck();
+                <span class="hljs-built_in">int</span> newCount = _entries.Length * <span class="hljs-number">2</span>;
+                <span class="hljs-comment">// We dont want that the next grow make the array only 1 item bigger, it would cause a bug later in this function.</span>
+                <span class="hljs-keyword">if</span>( newCount + <span class="hljs-number">1</span> == _maxPacketId ) newCount = _maxPacketId;
+                <span class="hljs-keyword">if</span>( newCount &gt; _maxPacketId ) newCount = _maxPacketId;
+                <span class="hljs-keyword">var</span> newEntries = <span class="hljs-keyword">new</span> ArrayStartingAt1&lt;IdStoreEntry&lt;T&gt;&gt;( <span class="hljs-keyword">new</span> IdStoreEntry&lt;T&gt;[newCount] );
+                _entries.CopyTo( newEntries, <span class="hljs-number">0</span> );
+                <span class="hljs-keyword">for</span>( <span class="hljs-built_in">int</span> i = _entries.Length + <span class="hljs-number">2</span>; i &lt; newEntries.Length; i++ ) <span class="hljs-comment">// Link all the new entries.</span>
+                {
+                    newEntries[i] = <span class="hljs-keyword">new</span> IdStoreEntry&lt;T&gt;()
+                    {
+                        PreviousId = i - <span class="hljs-number">1</span>,
+                        NextId = i + <span class="hljs-number">1</span>
+                    };
+                }
+                newEntries[^<span class="hljs-number">0</span>].PreviousId = newEntries.Length - <span class="hljs-number">1</span>;
+                newEntries[_tail].NextId = _entries.Length + <span class="hljs-number">1</span>; <span class="hljs-comment">// Link previous tail to our expansion.</span>
+                newEntries[_entries.Length + <span class="hljs-number">1</span>] = <span class="hljs-keyword">new</span> IdStoreEntry&lt;T&gt;()
+                {
+                    PreviousId = _tail, <span class="hljs-comment">// Link expansion to previous tail.</span>
+                    NextId = _entries.Length + <span class="hljs-number">2</span> <span class="hljs-comment">// If the count was increased only by 1, this would fail.</span>
+                };
+                _tail = newEntries.Length;
+                _entries = newEntries;
+                SelfConsistencyCheck();
+            }
+        }
+    }
+    
+
 </pre>
