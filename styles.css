@@ -185,3 +185,7 @@ body {
     padding: 25px;
     border-radius: 7px;
 }
+
+.frost-window a {
+    color: white;
+}
