@@ -15,7 +15,6 @@
     <div class="page-body" style="padding-top: 0px; width: 100%;">
         <div class="full-page" style="
             background-image: url('resources/main-image.jpg');
-            background-attachment: fixed;
             ">
             <div style="margin-top: 125px">
                 <div style="
@@ -38,24 +37,132 @@
 
         </div>
         <div class="full-page" style="background-image:url('resources/DSC09833.JPG');
-            z-index: 1;">
-            Ici parcours
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            background-attachment: fixed;
+            ">
+            <div class="page-content" style="width: 100%;">
+                <h1>Expérience</h1>
+                <div class="frost-window" style="width: 100%; background-color: rgba(111, 67, 42, 0.1);">
+                    <div class="timeline-entry">
+                        <div class="timeline-text text-to-right"></div>
+                        <div class="timeline-ruler">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-line">
+                            </div>
+                        </div>
+                        <div class="timeline-text">
+                            <div class="tl-title"> Développeur Librairies & Backend .NET - Alternant</div>
+                            <div class="tl-company">Signature Code</div>
+                            <div class="tl-date">Septembre 2019 – Aujourd’hui</div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-entry">
+                        <div class="timeline-text text-to-right">
+                            <div class="tl-title"> Bachelor IN'TECH</div>
+                            <div class="tl-date"> 2019 </div>
+                        </div>
+                        <div class="timeline-ruler">
+                            <div class="timeline-line-top">
+                            </div>
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-line">
+                            </div>
+                        </div>
+                        <div class="timeline-text">
+                           
+                        </div>
+                    </div>
+
+                    <div class="timeline-entry">
+                        <div class="timeline-text text-to-right">
+                          
+                        </div>
+                        <div class="timeline-ruler">
+                            <div class="timeline-line-top">
+                            </div>
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-line">
+                            </div>
+                        </div>
+                        <div class="timeline-text">
+                            <div class="tl-title"> Développeur Outils .NET - Stagiaire</div>
+                            <div class="tl-company">Signature Code</div>
+                            <div class="tl-date">Mars 2019 – Septembre 2019 </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-entry">
+                        <div class="timeline-text text-to-right">
+                            <div class="tl-title"> Développeur FullStack .NET - Stagiaire</div>
+                            <div class="tl-company">Signature Code</div>
+                            <div class="tl-date">Août 2018 – Septembre 2018 </div>
+                        </div>
+                        <div class="timeline-ruler">
+                            <div class="timeline-line-top">
+                            </div>
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-line">
+                            </div>
+                        </div>
+                        <div class="timeline-text">
+
+                        </div>
+                    </div>
+
+                    <div class="timeline-entry">
+                        <div class="timeline-text text-to-right">
+                         
+                        </div>
+                        <div class="timeline-ruler">
+                            <div class="timeline-line-top">
+                            </div>
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-line">
+                            </div>
+                        </div>
+                        <div class="timeline-text">
+                            <div class="tl-title"> Développeur WPF .NET - Stagiaire</div>
+                            <div class="tl-company">SIX</div>
+                            <div class="tl-date">Février 2018 – Mars 2018 </div>
+                        </div>
+                    </div>
+                    <div class="timeline-entry">
+                        <div class="timeline-text text-to-right">
+                            <div class="tl-title">Etudiant en Ingénieurie Logicielle</div>
+                            <div class="tl-company"> IN'TECH </div>
+                            <div class="tl-date"> 2016 - 2021 </div>
+                        </div>
+                        <div class="timeline-ruler">
+                            <div class="timeline-line-top">
+                            </div>
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-line">
+                            </div>
+                        </div>
+                        <div class="timeline-text">
+                          
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
         </div>
 
-        <div class="code-div" w3-include-html="codebackground.html" style="position: fixed; z-index: -1;"></div>
-        <div style="height: 100vh;"></div>
-    </div>
-    <script>
-        let a = w3IncludeHTML();
-        setTimeout(() => {
-            let elem = document.getElementById("code");
-            hljs.highlightElement(elem);
-            elem.addEventListener("focusout", () => {
+        <script>
+            let a = w3IncludeHTML();
+            setTimeout(() => {
+                let elem = document.getElementById("code");
                 hljs.highlightElement(elem);
-            })
-        }, 500)
+                elem.addEventListener("focusout", () => {
+                    hljs.highlightElement(elem);
+                })
+            }, 500)
 
-    </script>
+        </script>
 
 </body>
 
