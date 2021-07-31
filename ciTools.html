@@ -17,33 +17,34 @@
     <div class="page-body">
         <div class="page-content text-wall frost-window">
             <h3> Outils d’Intégration Continue </h3>
-            Le principe de Continious Integration (CI), intégration continue en francais, est de souvent intégrer les changements
+            Le principe de Continious Integration (CI), "intégration continue" en français, est d'intégrer fréquemment les changements
             des développeurs dans la base de code d’un produit. <br />
             Il est courant de rajouter un « Serveur de CI » qui va surveiller les changements sur le dépôt de code et exécuter un script pour vérifier les changements.
             <br />
-            Pendants 6 mois, j’ai travaillé sur la CI de Signature Code, et j'ai pus me familiariser avec différents outils sont utilisés lors de notre
-            cycle DevOps :
+            Pendant 6 mois, j’ai travaillé sur la CI de Signature Code, et j'ai pu me familiariser avec différents outils qui sont utilisés lors de notre
+            cycle DevOps. <br/>
+            Ci-dessous le processus de CI de Signature Code: <br/>
             <img src="ciDiag.png" alt="Schéma du processus de CI de Signature Code." />
 
             <h4>NPM & JavaScript/TypeScript</h4>
-            Le gestionnaire de paquet de JavaScript le plus populaire est Node Package Manager (NPM), il est plus commun
-            de l’appeler par son acronyme. <br />
+            Le gestionnaire de paquet de JavaScript le plus populaire est Node Package Manager, il est commun
+            de l’appeler par son acronyme NPM. <br />
             Nous avons rencontré de nombreuses difficultés dans l’utilisation de NPM,
-            principalement causées par que npm n’est pas conçu pour être piloté par être outil, ce qui rend l'utilisation de npm tortueuse.
+            principalement causées par ce que npm n’est pas conçu pour être piloté par un outil, ce qui rend son l'utilisation tortueuse.
             Par exemple, il est impossible de donner un mot de passe à NPM sans l’inscrire dans un fichier, fichier qui est normalement publié par le développeur. <br/>
             Cette pratique est un trou de sécurité et créer continuellement des nouvelles brèches de sécurité.
 
             <h4>NuGet</h4>
             NuGet est un gestionnaire de paquets développé par Microsoft, il est surtout utilisé sur la plateforme .NET.
             <br />
-            Un paquet est une archive contenant divers fichiers. Dans le cas de NuGet, les packages contiennent le plus souvent des composants réutilisable. <br />
+            Un paquet est une archive contenant divers fichiers. Dans le cas de NuGet, les paquets contiennent le plus souvent des composants réutilisables. <br />
             Un gestionnaire de paquets automatise les tâches liées au paquet, comme l’installation ou la mise à niveau.
             <br />
             Les paquets sont stockés dans un dépôt de paquets, et les gestionnaires de paquets sont souvent capables de
-            télécharger automatiquement les paquets à partir de son nom et de sa version. <br />
+            télécharger automatiquement les paquets à partir de leur nom et de leur version. <br />
             <h4>AppVeyor</h4>
                 AppVeyor est un service d’Intégration Continue qui fournit des serveurs de CI.
-                Chez Signature, ce service est utilisé sur tout nos projets Open Source.
+                Chez Signature, ce service est utilisé sur tous nos projets Open Source.
             <h4>Réalisations associées :</h4>
             <li>
                 <a href="ckli.html">CKli</a>
