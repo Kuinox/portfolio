@@ -245,3 +245,8 @@ body {
     height: 30px;
     margin: 5px;
 }
+
+.text-wall h3 {
+    text-align: center;
+    font-size: 25pt;
+}
