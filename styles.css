@@ -156,6 +156,10 @@ body {
     height: 100%;
 }
 
+.competence-list h3 {
+    font-size: 28px;
+}
+
 .competence-list a {
     color: white;
     padding: 10px;
@@ -166,6 +170,8 @@ body {
     display: flex;
     justify-content: center;
     text-align: center;
+    text-decoration: none;
+    font-size: 20px;
 }
 
 .competence-list a:hover {
